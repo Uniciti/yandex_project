@@ -10,9 +10,9 @@ from django.core.mail import send_mail
 from .models import Substation, SubstationGroup, SubstationType, MaintenanceStatus, MaintenanceRecord
 from .forms import SubstationForm, MaintenanceRecordForm, SubstationGroupForm, SubstationTypeForm, MaintenanceStatusForm
 import os
-import logging
+# import logging
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 def get_filtered_substations(request):
     substations = Substation.objects.select_related(
@@ -421,9 +421,10 @@ def substation_delete(request, substation_id):
                 [request.user.email],
                 fail_silently=False
             )
-            logger.info(f"Email об удалении подстанции {substation_info['name']} успешно отправлен")
+            # logger.info(f"Email об удалении подстанции {substation_info['name']} успешно отправлен")
         except Exception as e:
-            logger.error(f"Ошибка при отправке email об удалении подстанции: {str(e)}")
+            # logger.error(f"Ошибка при отправке email об удалении подстанции: {str(e)}")
+            ...
         
         return redirect('substations:substation_list')
     
@@ -469,9 +470,10 @@ def substation_type_delete(request, type_id):
                 [request.user.email],
                 fail_silently=False
             )
-            logger.info(f"Email об удалении типа подстанции {type_info['name']} успешно отправлен")
+            # logger.info(f"Email об удалении типа подстанции {type_info['name']} успешно отправлен")
         except Exception as e:
-            logger.error(f"Ошибка при отправке email об удалении типа подстанции: {str(e)}")
+            # logger.error(f"Ошибка при отправке email об удалении типа подстанции: {str(e)}")
+            ...
         
         return redirect('substations:substation_list')
     
@@ -521,9 +523,10 @@ def substation_group_delete(request, group_id):
                 [request.user.email],
                 fail_silently=False
             )
-            logger.info(f"Email об удалении группы подстанций {group_info['name']} успешно отправлен")
+            # logger.info(f"Email об удалении группы подстанций {group_info['name']} успешно отправлен")
         except Exception as e:
-            logger.error(f"Ошибка при отправке email об удалении группы подстанций: {str(e)}")
+            # logger.error(f"Ошибка при отправке email об удалении группы подстанций: {str(e)}")
+            ...
         
         return redirect('substations:substation_list')
     
@@ -593,9 +596,10 @@ def maintenance_record_delete(request, record_id):
                 [substation.author.email],
                 fail_silently=False
             )
-            logger.info(f"Email об удалении записи обслуживания для {record_info['substation_name']} успешно отправлен")
+            # logger.info(f"Email об удалении записи обслуживания для {record_info['substation_name']} успешно отправлен")
         except Exception as e:
-            logger.error(f"Ошибка при отправке email об удалении записи обслуживания: {str(e)}")
+            # logger.error(f"Ошибка при отправке email об удалении записи обслуживания: {str(e)}")
+            ...
         
         return redirect('substations:substation_detail', substation_id=substation.id)
     

@@ -117,22 +117,41 @@
     <!-- Пагинация -->
     {% if page_obj.has_other_pages %}
     <div class="flex justify-center mt-6">
-        <nav class="inline-flex rounded-md shadow">
+        <nav class="inline-flex items-center gap-2">
+            <!-- Кнопка "Назад" -->
             {% if page_obj.has_previous %}
             <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.group %}&group={{ request.GET.group }}{% endif %}" 
-               class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                Назад
+            class="px-3 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                &laquo; Назад
             </a>
             {% endif %}
             
-            <span class="px-3 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700">
-                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
-            </span>
+            <!-- Номера страниц -->
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="px-3 py-2 rounded-md border border-blue-500 bg-blue-500 text-white text-sm font-medium">
+                        {{ num }}
+                    </span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.group %}&group={{ request.GET.group }}{% endif %}"
+                    class="px-3 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        {{ num }}
+                    </a>
+                {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                    <a href="?page={{ num }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.group %}&group={{ request.GET.group }}{% endif %}"
+                    class="px-3 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        {{ num }}
+                    </a>
+                {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                    <span class="px-2 text-gray-500">...</span>
+                {% endif %}
+            {% endfor %}
             
+            <!-- Кнопка "Вперед" -->
             {% if page_obj.has_next %}
             <a href="?page={{ page_obj.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.group %}&group={{ request.GET.group }}{% endif %}" 
-               class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                Вперед
+            class="px-3 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Вперед &raquo;
             </a>
             {% endif %}
         </nav>
