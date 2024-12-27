@@ -1,0 +1,63 @@
+[
+    {
+        "model": "substations.substationgroup",
+        "pk": 1,
+        "fields": {
+            "name": "Северный район",
+            "description": "Подстанции северного района города"
+        }
+    },
+    {
+        "model": "substations.substationgroup",
+        "pk": 2,
+        "fields": {
+            "name": "Южный район",
+            "description": "Подстанции южного района города"
+        }
+    },
+    {
+        "model": "substations.substation",
+        "pk": 1,
+        "fields": {
+            "name": "ПС 110/10 Северная",
+            "power": 63.0,
+            "voltage": 110.0,
+            "city": "Москва",
+            "address": "ул. Северная, 1",
+            "group": 1,
+            "created_at": "2024-01-01T12:00:00Z",
+            "updated_at": "2024-01-01T12:00:00Z",
+            "connected_substations": [2]
+        }
+    },
+    {
+        "model": "substations.substation",
+        "pk": 2,
+        "fields": {
+            "name": "ПС 35/10 Парковая",
+            "power": 25.0,
+            "voltage": 35.0,
+            "city": "Москва",
+            "address": "ул. Парковая, 15",
+            "group": 1,
+            "created_at": "2024-01-01T12:00:00Z",
+            "updated_at": "2024-01-01T12:00:00Z",
+            "connected_substations": [1]
+        }
+    },
+    {
+        "model": "substations.substation",
+        "pk": 3,
+        "fields": {
+            "name": "ПС 220/110 Южная",
+            "power": 125.0,
+            "voltage": 220.0,
+            "city": "Москва",
+            "address": "ул. Южная, 22",
+            "group": 2,
+            "created_at": "2024-01-01T12:00:00Z",
+            "updated_at": "2024-01-01T12:00:00Z",
+            "connected_substations": []
+        }
+    }
+]

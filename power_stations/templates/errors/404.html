@@ -1,0 +1,17 @@
+<!-- templates/pages/404.html -->
+{% extends 'base.html' %}
+
+{% block title %}404 Страница не найдена{% endblock %}
+
+{% block content %}
+<div class="min-h-[50vh] flex items-center justify-center">
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">404</h1>
+        <p class="text-xl text-gray-600">Страница не найдена</p>
+        <p class="mt-4 text-gray-500">Запрошенная страница не существует</p>
+        <a href="{% url 'substations:substation_list' %}" class="mt-6 inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+            Вернуться на главную
+        </a>
+    </div>
+</div>
+{% endblock %}

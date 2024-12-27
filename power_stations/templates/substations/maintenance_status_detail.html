@@ -1,0 +1,92 @@
+<!-- templates/substations/maintenance_status_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ status.name }} - Статус обслуживания{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Информация о статусе -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-start">
+            <h1 class="text-3xl font-bold text-gray-900">{{ status.name }}</h1>
+            <span class="px-3 py-1 rounded-full text-sm {% if status.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                {{ status.is_active|yesno:"Активный,Неактивный" }}
+            </span>
+        </div>
+
+        {% if status.description %}
+        <div class="mt-6">
+            <h3 class="text-lg font-medium text-gray-900">Описание</h3>
+            <p class="mt-2 text-gray-600">{{ status.description }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Список записей об обслуживании с данным статусом -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Записи об обслуживании</h2>
+
+        {% if maintenance_records %}
+        <div class="space-y-4">
+            {% for record in maintenance_records %}
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start">
+                    <h3 class="font-medium text-lg text-gray-900">
+                        <a href="{% url 'substations:substation_detail' record.substation.id %}" 
+                           class="hover:text-blue-600">
+                            {{ record.substation.name }}
+                        </a>
+                    </h3>
+                    <div class="text-sm text-gray-500">
+                        {{ record.scheduled_date|date:"d.m.Y H:i" }}
+                    </div>
+                </div>
+                <div class="mt-2 space-y-2">
+                    <p class="text-gray-600">{{ record.description|truncatewords:50 }}</p>
+                    <div class="flex justify-between items-center text-sm">
+                        {% if record.completed_date %}
+                        <span class="px-2 py-1 rounded-full bg-green-100 text-green-800">
+                            Выполнено: {{ record.completed_date|date:"d.m.Y H:i" }}
+                        </span>
+                        {% else %}
+                        <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                            В процессе
+                        </span>
+                        {% endif %}
+                        <a href="{% url 'substations:maintenance_record_detail' record.id %}" 
+                           class="text-blue-600 hover:text-blue-800">
+                            Подробнее
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center text-gray-500 py-4">Нет записей с данным статусом</p>
+        {% endif %}
+    </div>
+
+    <!-- Статистика -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Всего записей</h3>
+            <p class="text-3xl font-bold text-blue-600">{{ maintenance_records.count }}</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Выполнено</h3>
+            <p class="text-3xl font-bold text-green-600">
+                {{ maintenance_records_completed.count }}
+            </p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-2">В процессе</h3>
+            <p class="text-3xl font-bold text-yellow-600">
+                {{ maintenance_records_in_progress.count }}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

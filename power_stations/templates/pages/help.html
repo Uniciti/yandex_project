@@ -1,0 +1,50 @@
+<!-- templates/pages/contact.html -->
+{% extends "base.html" %}
+
+{% block title %}Помощь{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Помощь</h1>
+        
+        <div class="space-y-6">
+            <div class="bg-blue-50 rounded-lg p-4">
+                <h2 class="text-xl font-medium text-blue-900 mb-4">Частые вопросы</h2>
+                
+                <div class="space-y-4">
+                    <div class="bg-white rounded-lg p-4 shadow-sm">
+                        <h3 class="font-medium text-gray-900 mb-2">Как добавить подстанцию?</h3>
+                        <p class="text-gray-600">
+                            1. Войдите в систему<br>
+                            2. Нажмите кнопку "Добавить подстанцию" на главной странице<br>
+                            3. Заполните необходимые поля<br>
+                            4. Нажмите "Создать подстанцию"
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 shadow-sm">
+                        <h3 class="font-medium text-gray-900 mb-2">Как запланировать обслуживание?</h3>
+                        <p class="text-gray-600">
+                            1. Откройте страницу подстанции<br>
+                            2. Нажмите "Добавить запись об обслуживании"<br>
+                            3. Укажите дату и описание работ
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-green-50 rounded-lg p-4">
+                <h2 class="text-xl font-medium text-green-900 mb-4">Документация</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a href="#" class="block p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors">
+                        <h3 class="font-medium text-gray-900 mb-2">Руководство пользователя</h3>
+                        <p class="text-gray-600">Подробное описание всех функций системы</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

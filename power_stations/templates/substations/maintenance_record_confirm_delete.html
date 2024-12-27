@@ -1,0 +1,87 @@
+<!-- templates/substations/maintenance_record_confirm_delete.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">{{ title }}</h1>
+
+        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Информация о записи:</h2>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Подстанция:</dt>
+                    <dd class="text-base text-gray-900">{{ record.substation.name }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Статус:</dt>
+                    <dd class="text-base text-gray-900">{{ record.status }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Запланированная дата:</dt>
+                    <dd class="text-base text-gray-900">
+                        {{ record.scheduled_date|date:"d.m.Y H:i" }}
+                    </dd>
+                </div>
+                {% if record.completed_date %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Дата выполнения:</dt>
+                    <dd class="text-base text-gray-900">
+                        {{ record.completed_date|date:"d.m.Y H:i" }}
+                    </dd>
+                </div>
+                {% endif %}
+                <div class="col-span-2">
+                    <dt class="text-sm font-medium text-gray-500">Описание:</dt>
+                    <dd class="text-base text-gray-900">{{ record.description|default:"Описание отсутствует" }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                        После удаления записи будут автоматически пересчитаны даты последнего и следующего обслуживания подстанции.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700">
+                        Это действие нельзя будет отменить! Запись об обслуживании будет безвозвратно удалена.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" class="flex justify-end space-x-4">
+            {% csrf_token %}
+            <a href="{% url 'substations:maintenance_record_detail' record.id %}"
+               class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                Отмена
+            </a>
+            <button type="submit"
+                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                    onclick="return confirm('Вы уверены, что хотите удалить эту запись об обслуживании?');">
+                Удалить запись
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,272 @@
+<!-- templates/substations/substation_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ substation.name }} - Информация о подстанции{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Верхняя панель с кнопками управления -->
+    {% if user.is_staff or user == substation.author %}
+    <div class="flex justify-end space-x-4 mb-6">
+        <a href="{% url 'substations:substation_edit' substation.id %}"
+        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+            Редактировать
+        </a>
+        <a href="{% url 'substations:substation_delete' substation.id %}"
+        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+            Удалить
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Изображение подстанции -->
+    {% if substation.image %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <img src="{{ substation.image.url }}" 
+             alt="{{ substation.name }}"
+             class="w-full h-64 object-cover">
+    </div>
+    {% endif %}
+
+    <!-- Основная информация -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-start mb-6">
+            <h2 class="text-xl font-bold text-gray-900">Основная информация</h2>
+            <div class="flex items-center space-x-4">
+                <span class="px-3 py-1 rounded-full {% if substation.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                    {{ substation.is_active|yesno:"Активна,Неактивна" }}
+                </span>
+                {% now "Y-m-d" as current_date %}
+                {% if substation.published_at|date:"Y-m-d" > current_date %}
+                <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                    Черновик
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+                <p class="text-gray-600">
+                    <span class="font-medium">Тип подстанции:</span> 
+                    {% if substation.group %}
+                    <a href="{% url 'substations:substation_type_detail' substation.substation_type.id %}" 
+                       class="text-blue-600 hover:text-blue-800">
+                        {{ substation.substation_type.name }}
+                    </a>
+                    {% else %}
+                    Не указан
+                    {% endif %}
+                </p>
+                <p class="text-gray-600">
+                    <span class="font-medium">Мощность:</span> 
+                    {{ substation.power }} МВА
+                </p>
+                <p class="text-gray-600">
+                    <span class="font-medium">Напряжение:</span> 
+                    {{ substation.voltage }} кВ
+                </p>
+                <p class="text-gray-600">
+                    <span class="font-medium">Автор:</span> 
+                    {% if substation.author %}
+                        <a href="{% url 'users:profile' username=substation.author.username %}" 
+                           class="text-blue-600 hover:text-blue-800">
+                            {{ substation.author.username }}
+                        </a>
+                    {% else %}
+                        <span class="text-gray-500">Не указан</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="space-y-3">
+                <p class="text-gray-600">
+                    <span class="font-medium">Город:</span> 
+                    {{ substation.city }}
+                </p>
+                <p class="text-gray-600">
+                    <span class="font-medium">Адрес:</span> 
+                    {{ substation.address }}
+                </p>
+                <p class="text-gray-600">
+                    <span class="font-medium">Группа:</span> 
+                    {% if substation.group %}
+                    <a href="{% url 'substations:group_detail' substation.group.id %}" 
+                       class="text-blue-600 hover:text-blue-800">
+                        {{ substation.group.name }}
+                    </a>
+                    {% else %}
+                    Не указана
+                    {% endif %}
+                </p>
+                <p class="text-gray-600">
+                    <span class="font-medium">Дата публикации:</span> 
+                    {{ substation.published_at|date:"d.m.Y H:i" }}
+                </p>
+            </div>
+        </div>
+
+        {% if substation.notes %}
+        <div class="mt-6 p-4 bg-gray-50 rounded-md">
+            <h3 class="font-medium text-gray-900 mb-2">Примечания:</h3>
+            <p class="text-gray-600">{{ substation.notes }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Статус обслуживания -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-gray-900">Статус обслуживания</h2>
+            {% if maintenance_needed %}
+            <span class="px-4 py-2 rounded-md bg-red-100 text-red-800">
+                Требуется обслуживание
+            </span>
+            {% endif %}
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <p class="text-gray-600">
+                    <span class="font-medium">Последнее обслуживание:</span><br>
+                    {% if substation.last_maintenance %}
+                        {{ substation.last_maintenance|date:"d.m.Y H:i" }}
+                    {% else %}
+                        Нет данных
+                    {% endif %}
+                </p>
+            </div>
+            <div>
+                <p class="text-gray-600">
+                    <span class="font-medium">Следующее обслуживание:</span><br>
+                    {% if substation.next_maintenance %}
+                        {{ substation.next_maintenance|date:"d.m.Y H:i" }}
+                    {% else %}
+                        Не запланировано
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- История обслуживания -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">История обслуживания</h2>
+        
+        {% if maintenance_records %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Дата
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Статус
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Описание работ
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Дата выполнения
+                        </th>
+                        {% if user.is_staff or user == substation.author %}
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Действия
+                        </th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for record in maintenance_records %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <a href="{% url 'substations:maintenance_record_detail' record.id %}" 
+                            class="hover:text-blue-600">
+                                {{ record.scheduled_date|date:"d.m.Y H:i" }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if record.status.name == 'Выполнено' %}
+                                    bg-green-100 text-green-800
+                                {% elif record.status.name == 'Запланировано' %}
+                                    bg-blue-100 text-blue-800
+                                {% else %}
+                                    bg-gray-100 text-gray-800
+                                {% endif %}">
+                                {{ record.status.name }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            <div class="max-w-xs truncate" title="{{ record.description }}">
+                                {{ record.description }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {% if record.completed_date %}
+                                {{ record.completed_date|date:"d.m.Y H:i" }}
+                            {% else %}
+                                <span class="text-gray-400">Не выполнено</span>
+                            {% endif %}
+                        </td>
+                        {% if user.is_staff or user == substation.author %}
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                            <div class="flex justify-end space-x-3">
+                                <!-- Кнопка удаления -->
+                                <a href="{% url 'substations:maintenance_record_delete' record.id %}"
+                                class="text-red-600 hover:text-red-900 transition-colors"
+                                title="Удалить запись">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </a>
+                                <!-- Кнопка просмотра деталей -->
+                                <a href="{% url 'substations:maintenance_record_detail' record.id %}"
+                                class="text-blue-600 hover:text-blue-900 transition-colors"
+                                title="Просмотреть детали">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-4">Записей об обслуживании нет</p>
+        {% endif %}
+    </div>
+
+    <!-- Связанные подстанции -->
+    {% if substation.connected_substations.exists %}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Связанные подстанции</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for connected in substation.connected_substations.all %}
+            <a href="{% url 'substations:substation_detail' connected.id %}" 
+               class="block p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                <h3 class="font-medium text-gray-900">{{ connected.name }}</h3>
+                <p class="text-sm text-gray-500">{{ connected.voltage }} кВ</p>
+                <p class="text-sm text-gray-500">{{ connected.city }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Мета-информация -->
+    <div class="bg-gray-100 rounded-lg p-4 text-sm text-gray-500">
+        <p>Создано: {{ substation.created_at|date:"d.m.Y H:i" }}</p>
+        <p>Последнее обновление: {{ substation.updated_at|date:"d.m.Y H:i" }}</p>
+    </div>
+</div>
+{% endblock %}

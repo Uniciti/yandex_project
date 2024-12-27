@@ -1,0 +1,65 @@
+<!-- templates/substations/maintenance_record_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}Запись об обслуживании - {{ record.substation.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    {% if user.is_staff or user == substation.author %}
+    <div class="flex justify-end space-x-4 mb-6">
+        <a href="{% url 'substations:maintenance_record_delete' record.id %}"
+           class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+            Удалить запись
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="mb-8">
+        <div class="flex justify-between items-start">
+            <h1 class="text-2xl font-bold text-gray-900">Запись об обслуживании</h1>
+            <a href="{% url 'substations:substation_detail' substation.id %}" 
+               class="text-blue-600 hover:text-blue-800">
+                Вернуться к подстанции
+            </a>
+        </div>
+        <p class="text-gray-600">{{ substation.name }}</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="space-y-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm text-gray-500">Статус</p>
+                    <p class="text-lg font-medium text-gray-900">
+                        <span class="px-2 py-1 rounded-full text-sm
+                            {% if record.is_active %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ record.status.name }}
+                        </span>
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Дата планирования</p>
+                    <p class="text-lg font-medium text-gray-900">{{ record.scheduled_date|date:"d.m.Y H:i" }}</p>
+                </div>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-500">Описание работ</p>
+                <p class="mt-1 text-gray-900">{{ record.description }}</p>
+            </div>
+
+            {% if record.completed_date %}
+            <div>
+                <p class="text-sm text-gray-500">Дата выполнения</p>
+                <p class="text-lg font-medium text-gray-900">{{ record.completed_date|date:"d.m.Y H:i" }}</p>
+            </div>
+            {% endif %}
+
+            <div class="border-t pt-4 mt-4">
+                <p class="text-sm text-gray-500">Создано: {{ record.created_at|date:"d.m.Y H:i" }}</p>
+                <p class="text-sm text-gray-500">Обновлено: {{ record.updated_at|date:"d.m.Y H:i" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

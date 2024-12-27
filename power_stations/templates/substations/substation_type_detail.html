@@ -1,0 +1,99 @@
+<!-- templates/substations/substation_type_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ substation_type.name }} - Тип подстанций{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="space-y-8">
+        {% if user.is_staff %}
+        <div class="flex justify-end space-x-4 mb-6">
+            <a href="{% url 'substations:substation_type_delete' substation_type.id %}"
+            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                Удалить тип
+            </a>
+        </div>
+        {% endif %}
+        <!-- Информация о типе -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ substation_type.name }}</h1>
+                    <p class="mt-2 text-sm text-gray-500">
+                        Создан: {{ substation_type.created_at|date:"d.m.Y" }}
+                    </p>
+                </div>
+                <a href="{% url 'substations:substation_list' %}" 
+                   class="text-blue-600 hover:text-blue-800">
+                    Вернуться к списку
+                </a>
+            </div>
+
+            {% if substation_type.description %}
+            <div class="mt-6">
+                <h3 class="text-lg font-medium text-gray-900">Описание</h3>
+                <p class="mt-2 text-gray-600">{{ substation_type.description }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Список подстанций данного типа -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Подстанции данного типа</h2>
+
+            {% if substations %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for substation in substations %}
+                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <h3 class="font-medium text-lg text-gray-900">
+                        <a href="{% url 'substations:substation_detail' substation.id %}" 
+                           class="hover:text-blue-600">
+                            {{ substation.name }}
+                        </a>
+                    </h3>
+                    <div class="mt-2 space-y-1 text-sm text-gray-600">
+                        {% if substation.group %}
+                        <p>
+                            <span class="font-medium">Группа:</span> 
+                            <a href="{% url 'substations:group_detail' substation.group.id %}" 
+                               class="text-blue-600 hover:text-blue-800">
+                                {{ substation.group.name }}
+                            </a>
+                        </p>
+                        {% endif %}
+                        <p>
+                            <span class="font-medium">Мощность:</span> 
+                            {{ substation.power }} МВА
+                        </p>
+                        <p>
+                            <span class="font-medium">Напряжение:</span> 
+                            {{ substation.voltage }} кВ
+                        </p>
+                        <p>
+                            <span class="font-medium">Город:</span> 
+                            {{ substation.city }}
+                        </p>
+                        <p class="mt-2">
+                            <span class="px-2 py-1 rounded-full text-xs 
+                                {% if substation.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ substation.is_active|yesno:"Активна,Неактивна" }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center text-gray-500 py-4">Нет подстанций данного типа</p>
+            {% endif %}
+        </div>
+
+        <!-- Мета-информация -->
+        <div class="bg-gray-50 rounded-lg p-4">
+            <p class="text-sm text-gray-500">
+                Последнее обновление: {{ substation_type.updated_at|date:"d.m.Y H:i" }}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

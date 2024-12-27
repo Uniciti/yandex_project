@@ -1,0 +1,37 @@
+<!-- templates/users/signup.html -->
+{% extends 'base.html' %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Регистрация</h1>
+    
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="space-y-1">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <p class="text-red-500 text-xs">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+            Зарегистрироваться
+        </button>
+    </form>
+    
+    <p class="mt-4 text-center text-gray-600">
+        Уже есть аккаунт? 
+        <a href="{% url 'login' %}" class="text-blue-600 hover:text-blue-800">
+            Войти
+        </a>
+    </p>
+</div>
+{% endblock %}

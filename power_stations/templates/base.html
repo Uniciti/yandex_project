@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>{% block title %}Система учета подстанций{% endblock %}</title>
+   <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-full flex flex-col bg-gray-100">
+   <nav class="bg-white shadow-lg">
+       <div class="max-w-6xl mx-auto px-4">
+           <div class="flex justify-between h-16">
+               <!-- Левая часть навигации -->
+               <div class="flex items-center space-x-8">
+                   <a href="{% url 'substations:substation_list' %}" class="flex-shrink-0 flex items-center">
+                       <span class="text-xl font-bold text-gray-800">Электроподстанции</span>
+                   </a>
+                   
+                   <!-- Основное меню -->
+                   <div class="hidden md:flex items-center space-x-4">
+                       <a href="{% url 'substations:substation_list' %}" 
+                          class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                           Подстанции
+                       </a>
+                       {% if user.is_authenticated %}
+                       <a href="{% url 'substations:substation_create' %}" 
+                          class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                           Добавить подстанцию
+                       </a>
+                       {% endif %}
+                   </div>
+                   
+                   <!-- Статические страницы -->
+                   <div class="hidden md:flex items-center space-x-4">
+                       <a href="{% url 'pages:about' %}" 
+                          class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                           О проекте
+                       </a>
+                       <a href="{% url 'pages:help' %}" 
+                          class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                           Помощь
+                       </a>
+                       <a href="{% url 'pages:contact' %}" 
+                          class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                           Контакты
+                       </a>
+                   </div>
+               </div>
+
+               <!-- Правая часть навигации -->
+               <div class="flex items-center space-x-4">
+                   {% if user.is_authenticated %}
+                       <div class="flex items-center space-x-4">
+                           <a href="{% url 'users:profile' username=user.username %}" 
+                              class="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
+                               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                               </svg>
+                               <span>{{ user.username }}</span>
+                           </a>
+                           <form method="post" action="{% url 'logout' %}" class="inline">
+                               {% csrf_token %}
+                               <button type="submit" 
+                                       class="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
+                                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                   </svg>
+                                   <span>Выйти</span>
+                               </button>
+                           </form>
+                       </div>
+                   {% else %}
+                       <a href="{% url 'login' %}" 
+                          class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                           Войти
+                       </a>
+                       <a href="{% url 'users:signup' %}" 
+                          class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">
+                           Регистрация
+                       </a>
+                   {% endif %}
+               </div>
+           </div>
+       </div>
+   </nav>
+
+   <!-- Мобильное меню -->
+   <div class="md:hidden bg-white border-t">
+       <div class="px-2 pt-2 pb-3 space-y-1">
+           <a href="{% url 'substations:substation_list' %}" 
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+               Подстанции
+           </a>
+           {% if user.is_authenticated %}
+           <a href="{% url 'substations:substation_create' %}" 
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+               Добавить подстанцию
+           </a>
+           {% endif %}
+           <a href="{% url 'pages:about' %}" 
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+               О проекте
+           </a>
+           <a href="{% url 'pages:help' %}" 
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+               Помощь
+           </a>
+           <a href="{% url 'pages:contact' %}" 
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+               Контакты
+           </a>
+       </div>
+   </div>
+
+   <main class="flex-1 container mx-auto px-4 py-8">
+       {% block content %}
+       {% endblock %}
+   </main>
+
+   <footer class="bg-white shadow-lg w-full mt-auto">
+       <div class="max-w-6xl mx-auto px-4 py-6">
+           <div class="flex justify-between items-center">
+               <div class="text-gray-600">
+                   © {% now "Y" %} Система учета подстанций
+               </div>
+               <div class="flex space-x-4">
+                   <a href="{% url 'pages:about' %}" class="text-gray-600 hover:text-gray-900">О проекте</a>
+                   <a href="{% url 'pages:contact' %}" class="text-gray-600 hover:text-gray-900">Контакты</a>
+                   <a href="{% url 'pages:help' %}" class="text-gray-600 hover:text-gray-900">Помощь</a>
+               </div>
+           </div>
+       </div>
+   </footer>
+</body>
+</html>

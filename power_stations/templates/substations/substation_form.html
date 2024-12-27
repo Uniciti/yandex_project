@@ -1,0 +1,272 @@
+<!-- templates/substations/substation_form.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+  <div class="mb-8">
+      <h1 class="text-2xl font-bold text-gray-900">{{ title }}</h1>
+  </div>
+
+  <div class="space-y-8">
+      <!-- Форма редактирования/создания подстанции -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold mb-4">
+              {% if is_edit %}Основная информация{% else %}Создание новой подстанции{% endif %}
+          </h2>
+          <form method="post" enctype="multipart/form-data" class="space-y-6">
+              {% csrf_token %}
+              {% if form_type %}
+              <input type="hidden" name="form_type" value="substation">
+              {% endif %}
+              
+              <!-- Основная информация -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Левая колонка -->
+                  <div class="space-y-4">
+                      {% for field in form %}
+                          {% if field.name in 'name,power,voltage,city,address' %}
+                          <div class="space-y-1">
+                              <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                  {{ field.label }}
+                              </label>
+                              {{ field }}
+                              {% if field.errors %}
+                              <p class="text-sm text-red-600">{{ field.errors.0 }}</p>
+                              {% endif %}
+                          </div>
+                          {% endif %}
+                      {% endfor %}
+                  </div>
+
+                  <!-- Правая колонка -->
+                  <div class="space-y-4">
+                      {% for field in form %}
+                          {% if field.name in 'group,substation_type,is_active,image,notes' %}
+                          <div class="space-y-1">
+                              <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                  {{ field.label }}
+                              </label>
+                              {{ field }}
+                              {% if field.errors %}
+                              <p class="text-sm text-red-600">{{ field.errors.0 }}</p>
+                              {% endif %}
+                          </div>
+                          {% endif %}
+                      {% endfor %}
+                  </div>
+              </div>
+
+              <!-- Даты обслуживания -->
+              <div class="mt-6 p-4 bg-gray-50 rounded-md">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Даты обслуживания</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label for="{{ form.last_maintenance.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            {{ form.last_maintenance.label }}
+                        </label>
+                        {{ form.last_maintenance }}
+                        {% if form.last_maintenance.errors %}
+                        <p class="text-sm text-red-600">{{ form.last_maintenance.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-1">
+                        <label for="{{ form.next_maintenance.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            {{ form.next_maintenance.label }}
+                        </label>
+                        {{ form.next_maintenance }}
+                        {% if form.next_maintenance.errors %}
+                        <p class="text-sm text-red-600">{{ form.next_maintenance.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+              <div class="flex justify-end space-x-4 pt-4">
+                  {% if is_edit %}
+                      <a href="{% url 'substations:substation_detail' substation.id %}" 
+                         class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                          Отмена
+                      </a>
+                  {% else %}
+                      <a href="{% url 'substations:substation_list' %}" 
+                         class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                          Отмена
+                      </a>
+                  {% endif %}
+                  <button type="submit" 
+                          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                      {% if is_edit %}Сохранить изменения{% else %}Создать подстанцию{% endif %}
+                  </button>
+              </div>
+          </form>
+      </div>
+
+       {% if is_edit %}
+       <!-- Дополнительные формы только для режима редактирования -->
+       
+        <!-- Форма создания записи об обслуживании -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Добавить запись об обслуживании</h2>
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="maintenance">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for field in maintenance_form %}
+                    <div class="space-y-1">
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <p class="text-sm text-red-600">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="flex justify-end mt-4">
+                    <button type="submit" 
+                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                        Добавить запись
+                    </button>
+                </div>
+            </form>
+        </div>
+       <!-- Форма создания группы подстанций -->
+       <div class="bg-white rounded-lg shadow-md p-6">
+           <h2 class="text-xl font-semibold mb-4">Создать новую группу подстанций</h2>
+           <form method="post" class="space-y-6">
+               {% csrf_token %}
+               <input type="hidden" name="form_type" value="group">
+               
+               {% for field in group_form %}
+               <div class="space-y-1">
+                   <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                       {{ field.label }}
+                   </label>
+                   {{ field }}
+                   {% if field.errors %}
+                   <p class="text-sm text-red-600">{{ field.errors.0 }}</p>
+                   {% endif %}
+               </div>
+               {% endfor %}
+
+               <div class="flex justify-end">
+                   <button type="submit" 
+                           class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+                       Создать группу
+                   </button>
+               </div>
+           </form>
+       </div>
+
+       <!-- Форма создания типа подстанций -->
+       <div class="bg-white rounded-lg shadow-md p-6">
+           <h2 class="text-xl font-semibold mb-4">Создать новый тип подстанций</h2>
+           <form method="post" class="space-y-6">
+               {% csrf_token %}
+               <input type="hidden" name="form_type" value="type">
+               
+               {% for field in type_form %}
+               <div class="space-y-1">
+                   <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                       {{ field.label }}
+                   </label>
+                   {{ field }}
+                   {% if field.errors %}
+                   <p class="text-sm text-red-600">{{ field.errors.0 }}</p>
+                   {% endif %}
+               </div>
+               {% endfor %}
+
+               <div class="flex justify-end">
+                   <button type="submit" 
+                           class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                       Создать тип
+                   </button>
+               </div>
+           </form>
+       </div>
+
+       <!-- Форма создания статуса обслуживания -->
+       <div class="bg-white rounded-lg shadow-md p-6">
+           <h2 class="text-xl font-semibold mb-4">Создать новый статус обслуживания</h2>
+           <form method="post" class="space-y-6">
+               {% csrf_token %}
+               <input type="hidden" name="form_type" value="status">
+               
+               {% for field in status_form %}
+               <div class="space-y-1">
+                   <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                       {{ field.label }}
+                   </label>
+                   {{ field }}
+                   {% if field.errors %}
+                   <p class="text-sm text-red-600">{{ field.errors.0 }}</p>
+                   {% endif %}
+               </div>
+               {% endfor %}
+
+               <div class="flex justify-end">
+                   <button type="submit" 
+                           class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700">
+                       Создать статус
+                   </button>
+               </div>
+           </form>
+       </div>
+
+       <!-- Списки существующих элементов -->
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <!-- Статусы обслуживания -->
+           <div class="bg-white rounded-lg shadow-md p-6">
+               <h2 class="text-xl font-semibold mb-4">Статусы обслуживания</h2>
+               <div class="space-y-2">
+                   {% for status in maintenance_statuses %}
+                   <a href="{% url 'substations:maintenance_status_detail' status.id %}"
+                      class="block p-2 hover:bg-gray-50 rounded">
+                       {{ status.name }}
+                   </a>
+                   {% empty %}
+                   <p class="text-gray-500">Нет созданных статусов</p>
+                   {% endfor %}
+               </div>
+           </div>
+
+           <!-- Группы подстанций -->
+           <div class="bg-white rounded-lg shadow-md p-6">
+               <h2 class="text-xl font-semibold mb-4">Группы подстанций</h2>
+               <div class="space-y-2">
+                   {% for group in groups %}
+                   <a href="{% url 'substations:group_detail' group.id %}"
+                      class="block p-2 hover:bg-gray-50 rounded">
+                       {{ group.name }}
+                   </a>
+                   {% empty %}
+                   <p class="text-gray-500">Нет созданных групп</p>
+                   {% endfor %}
+               </div>
+           </div>
+
+           <!-- Типы подстанций -->
+           <div class="bg-white rounded-lg shadow-md p-6">
+               <h2 class="text-xl font-semibold mb-4">Типы подстанций</h2>
+               <div class="space-y-2">
+                   {% for type in types %}
+                   <a href="{% url 'substations:substation_type_detail' type.id %}"
+                      class="block p-2 hover:bg-gray-50 rounded">
+                       {{ type.name }}
+                   </a>
+                   {% empty %}
+                   <p class="text-gray-500">Нет созданных типов</p>
+                   {% endfor %}
+               </div>
+           </div>
+       </div>
+       {% endif %}
+   </div>
+</div>
+{% endblock %}

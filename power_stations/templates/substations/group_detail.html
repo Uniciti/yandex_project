@@ -1,0 +1,96 @@
+<!-- templates/substations/group_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ group.name }} - Группа подстанций{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    {% if user.is_staff %}
+    <div class="flex justify-end space-x-4 mb-6">
+        <a href="{% url 'substations:substation_group_delete' group.id %}"
+        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+            Удалить группу
+        </a>
+    </div>
+    {% endif %}
+    <!-- Информация о группе -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-start">
+            <h1 class="text-3xl font-bold text-gray-900">{{ group.name }}</h1>
+            <span class="text-sm text-gray-500">
+                Создана: {{ group.created_at|date:"d.m.Y" }}
+            </span>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% if group.description %}
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Описание</h3>
+                <p class="mt-2 text-gray-600">{{ group.description }}</p>
+            </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                {% if group.responsible_person %}
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Ответственное лицо</h3>
+                    <p class="mt-2 text-gray-600">{{ group.responsible_person }}</p>
+                </div>
+                {% endif %}
+
+                {% if group.contact_info %}
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Контактная информация</h3>
+                    <p class="mt-2 text-gray-600">{{ group.contact_info }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Список подстанций в группе -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Подстанции в группе</h2>
+
+        {% if substations %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for substation in substations %}
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <h3 class="font-medium text-lg text-gray-900">
+                    <a href="{% url 'substations:substation_detail' substation.id %}" 
+                       class="hover:text-blue-600">
+                        {{ substation.name }}
+                    </a>
+                </h3>
+                <div class="mt-2 space-y-1 text-sm text-gray-600">
+                    <p>
+                        <span class="font-medium">Тип:</span> 
+                        {{ substation.substation_type|default:"Не указан" }}
+                    </p>
+                    <p>
+                        <span class="font-medium">Мощность:</span> 
+                        {{ substation.power }} МВА
+                    </p>
+                    <p>
+                        <span class="font-medium">Напряжение:</span> 
+                        {{ substation.voltage }} кВ
+                    </p>
+                    <p>
+                        <span class="font-medium">Город:</span> 
+                        {{ substation.city }}
+                    </p>
+                    <p class="mt-2">
+                        <span class="px-2 py-1 rounded-full text-xs {% if substation.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ substation.is_active|yesno:"Активна,Неактивна" }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center text-gray-500 py-4">В этой группе нет подстанций</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

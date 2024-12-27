@@ -1,0 +1,42 @@
+<!-- templates/pages/about.html -->
+{% extends "base.html" %}
+
+{% block title %}О проекте{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">О проекте</h1>
+        
+        <div class="prose max-w-none text-gray-600">
+            <p class="mb-4">
+                Система управления подстанциями - это современное решение для эффективного управления электрическими подстанциями и их обслуживанием.
+            </p>
+            
+            <h2 class="text-xl font-bold text-gray-900 mt-8 mb-4">Основные возможности</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-4 border rounded-lg bg-blue-50">
+                    <h3 class="font-medium text-blue-900 mb-2">Учет подстанций</h3>
+                    <p class="text-blue-800">Ведение полной базы данных подстанций</p>
+                </div>
+                
+                <div class="p-4 border rounded-lg bg-green-50">
+                    <h3 class="font-medium text-green-900 mb-2">Планирование обслуживания</h3>
+                    <p class="text-green-800">Контроль технического обслуживания</p>
+                </div>
+                
+                <div class="p-4 border rounded-lg bg-purple-50">
+                    <h3 class="font-medium text-purple-900 mb-2">Мониторинг состояния</h3>
+                    <p class="text-purple-800">Отслеживание текущего состояния оборудования и необходимости ремонта</p>
+                </div>
+                
+                <div class="p-4 border rounded-lg bg-yellow-50">
+                    <h3 class="font-medium text-yellow-900 mb-2">Помогите</h3>
+                    <p class="text-yellow-800">Я устал это делать</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

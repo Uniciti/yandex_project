@@ -1,0 +1,125 @@
+<!-- templates/users/profile.html -->
+{% extends 'base.html' %}
+
+{% block title %}Профиль {{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Информация о пользователе -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-start">
+            <h1 class="text-2xl font-bold text-gray-900">
+                Профиль пользователя {{ profile_user.username }}
+            </h1>
+            {% if is_owner %}
+            <div class="flex space-x-4">
+                <a href="{% url 'users:profile_edit' %}" 
+                   class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                    Редактировать профиль
+                </a>
+                <a href="{% url 'users:password_change' %}" 
+                   class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200">
+                    Изменить пароль
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Имя пользователя</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ profile_user.username }}</dd>
+                </div>
+                {% if profile_user.first_name or profile_user.last_name %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Полное имя</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ profile_user.first_name }} {{ profile_user.last_name }}
+                    </dd>
+                </div>
+                {% endif %}
+                {% if profile_user.email %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Email</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ profile_user.email }}</dd>
+                </div>
+                {% endif %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Дата регистрации</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ profile_user.date_joined|date:"d.m.Y" }}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Подстанции пользователя -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-6">
+            Подстанции пользователя
+        </h2>
+
+        {% if substations %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for substation in substations %}
+                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <h3 class="font-medium text-lg text-gray-900">
+                        <a href="{% url 'substations:substation_detail' substation.id %}" 
+                           class="hover:text-blue-600">
+                            {{ substation.name }}
+                        </a>
+                    </h3>
+                    <div class="mt-2 space-y-1 text-sm text-gray-600">
+                        <p>
+                            <span class="font-medium">Тип:</span> 
+                            {{ substation.substation_type|default:"Не указан" }}
+                        </p>
+                        <p>
+                            <span class="font-medium">Мощность:</span> 
+                            {{ substation.power }} МВА
+                        </p>
+                        <p>
+                            <span class="font-medium">Напряжение:</span> 
+                            {{ substation.voltage }} кВ
+                        </p>
+                        <p>
+                            <span class="font-medium">Город:</span> 
+                            {{ substation.city }}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Пагинация -->
+            {% if substations.has_other_pages %}
+            <div class="mt-6 flex justify-center">
+                <nav class="inline-flex rounded-md shadow">
+                    {% if substations.has_previous %}
+                        <a href="?page={{ substations.previous_page_number }}" 
+                           class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Назад
+                        </a>
+                    {% endif %}
+                    
+                    <span class="px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                        {{ substations.number }} из {{ substations.paginator.num_pages }}
+                    </span>
+
+                    {% if substations.has_next %}
+                        <a href="?page={{ substations.next_page_number }}" 
+                           class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Вперед
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+        {% else %}
+            <p class="text-center text-gray-500 py-4">У пользователя пока нет подстанций</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
