@@ -112,6 +112,7 @@
             <form method="post" class="space-y-6">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="maintenance">
+                <input type="hidden" name="substation" value="{{ substation.id }}">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {% for field in maintenance_form %}

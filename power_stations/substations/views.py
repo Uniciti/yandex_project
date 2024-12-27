@@ -9,6 +9,10 @@ from django.conf import settings
 from django.core.mail import send_mail
 from .models import Substation, SubstationGroup, SubstationType, MaintenanceStatus, MaintenanceRecord
 from .forms import SubstationForm, MaintenanceRecordForm, SubstationGroupForm, SubstationTypeForm, MaintenanceStatusForm
+import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_filtered_substations(request):
     substations = Substation.objects.select_related(
@@ -258,21 +262,23 @@ def substation_edit(request, substation_id):
                return redirect('substations:substation_detail', substation_id=substation_id)
 
        elif form_type == 'maintenance':
-           maintenance_form = MaintenanceRecordForm(request.POST)
-           if maintenance_form.is_valid():
-               maintenance = maintenance_form.save(commit=False)
-               maintenance.substation = substation
-               maintenance.save()
+        maintenance_form = MaintenanceRecordForm(request.POST)
+        if maintenance_form.is_valid():
+            maintenance = maintenance_form.save(commit=False)
+            maintenance.substation = substation
+            maintenance.is_active = True if not maintenance.completed_date else False
+            maintenance.save()
 
-               if maintenance.completed_date:
-                   if not substation.last_maintenance or maintenance.completed_date > substation.last_maintenance:
-                       substation.last_maintenance = maintenance.completed_date
-               if maintenance.scheduled_date and not maintenance.completed_date:
-                   if not substation.next_maintenance or maintenance.scheduled_date < substation.next_maintenance:
-                       substation.next_maintenance = maintenance.scheduled_date
-               substation.save()
-               
-               return redirect('substations:substation_detail', substation_id=substation_id)
+            # Обновляем даты обслуживания подстанции
+            if maintenance.completed_date:
+                if not substation.last_maintenance or maintenance.completed_date > substation.last_maintenance:
+                    substation.last_maintenance = maintenance.completed_date
+            if maintenance.scheduled_date and not maintenance.completed_date:
+                if not substation.next_maintenance or maintenance.scheduled_date < substation.next_maintenance:
+                    substation.next_maintenance = maintenance.scheduled_date
+            substation.save()
+            
+            return redirect('substations:substation_detail', substation_id=substation_id)
        
        elif form_type == 'group':
            group_form = SubstationGroupForm(request.POST)
@@ -387,7 +393,37 @@ def substation_delete(request, substation_id):
         return redirect('substations:substation_detail', substation_id=substation_id)
     
     if request.method == 'POST':
+        # Сохраняем информацию перед удалением
+        substation_info = {
+            'name': substation.name,
+            'type': str(substation.substation_type) if substation.substation_type else 'Не указан',
+            'group': str(substation.group) if substation.group else 'Не указана',
+            'maintenance_count': substation.maintenance_records.count()
+        }
+        
         substation.delete()
+        
+        try:
+            if not os.path.exists(settings.EMAIL_FILE_PATH):
+                os.makedirs(settings.EMAIL_FILE_PATH)
+                
+            send_mail(
+                f"{settings.EMAIL_SUBJECT_PREFIX}Удалена подстанция: {substation_info['name']}",
+                f"""Была удалена подстанция:
+                Название: {substation_info['name']}
+                Тип: {substation_info['type']}
+                Группа: {substation_info['group']}
+                Количество записей обслуживания: {substation_info['maintenance_count']}
+                
+                Удалено пользователем: {request.user}
+                """,
+                settings.DEFAULT_FROM_EMAIL,
+                [request.user.email],
+                fail_silently=False
+            )
+            logger.info(f"Email об удалении подстанции {substation_info['name']} успешно отправлен")
+        except Exception as e:
+            logger.error(f"Ошибка при отправке email об удалении подстанции: {str(e)}")
         
         return redirect('substations:substation_list')
     
@@ -408,22 +444,34 @@ def substation_type_delete(request, type_id):
     substations_count = Substation.objects.filter(substation_type=substation_type).count()
     
     if request.method == 'POST':
-        type_name = substation_type.name
+        type_info = {
+            'name': substation_type.name,
+            'description': substation_type.description,
+            'substations_count': substations_count
+        }
+        
         substation_type.delete()
         
-        if hasattr(settings, 'EMAIL_BACKEND'):
+        try:
+            if not os.path.exists(settings.EMAIL_FILE_PATH):
+                os.makedirs(settings.EMAIL_FILE_PATH)
+                
             send_mail(
-                f"{settings.EMAIL_SUBJECT_PREFIX}Удален тип подстанции: {type_name}",
+                f"{settings.EMAIL_SUBJECT_PREFIX}Удален тип подстанции: {type_info['name']}",
                 f"""Был удален тип подстанции:
-                Название: {type_name}
-                Количество связанных подстанций: {substations_count}
+                Название: {type_info['name']}
+                Описание: {type_info['description']}
+                Количество связанных подстанций: {type_info['substations_count']}
                 
                 Удалено пользователем: {request.user}
                 """,
                 settings.DEFAULT_FROM_EMAIL,
                 [request.user.email],
-                fail_silently=True,
+                fail_silently=False
             )
+            logger.info(f"Email об удалении типа подстанции {type_info['name']} успешно отправлен")
+        except Exception as e:
+            logger.error(f"Ошибка при отправке email об удалении типа подстанции: {str(e)}")
         
         return redirect('substations:substation_list')
     
@@ -446,22 +494,36 @@ def substation_group_delete(request, group_id):
     substations_count = group.substations.count()
     
     if request.method == 'POST':
-        group_name = group.name
+        group_info = {
+            'name': group.name,
+            'description': group.description,
+            'responsible_person': group.responsible_person,
+            'substations_count': substations_count
+        }
+        
         group.delete()
         
-        if hasattr(settings, 'EMAIL_BACKEND'):
+        try:
+            if not os.path.exists(settings.EMAIL_FILE_PATH):
+                os.makedirs(settings.EMAIL_FILE_PATH)
+                
             send_mail(
-                f"{settings.EMAIL_SUBJECT_PREFIX}Удалена группа подстанций: {group_name}",
+                f"{settings.EMAIL_SUBJECT_PREFIX}Удалена группа подстанций: {group_info['name']}",
                 f"""Была удалена группа подстанций:
-                Название: {group_name}
-                Количество подстанций в группе: {substations_count}
+                Название: {group_info['name']}
+                Описание: {group_info['description']}
+                Ответственное лицо: {group_info['responsible_person']}
+                Количество подстанций в группе: {group_info['substations_count']}
                 
                 Удалено пользователем: {request.user}
                 """,
                 settings.DEFAULT_FROM_EMAIL,
                 [request.user.email],
-                fail_silently=True,
+                fail_silently=False
             )
+            logger.info(f"Email об удалении группы подстанций {group_info['name']} успешно отправлен")
+        except Exception as e:
+            logger.error(f"Ошибка при отправке email об удалении группы подстанций: {str(e)}")
         
         return redirect('substations:substation_list')
     
@@ -480,24 +542,23 @@ def maintenance_record_delete(request, record_id):
         'substation__author'
     ), id=record_id)
     
-    # Проверяем права доступа
     if request.user != record.substation.author and not request.user.is_staff:
         return redirect('substations:maintenance_record_detail', record_id=record_id)
     
     substation = record.substation
     
     if request.method == 'POST':
-        # Сохраняем информацию для email перед удалением
         record_info = {
             'substation_name': substation.name,
             'status': str(record.status),
-            'scheduled_date': record.scheduled_date,
-            'completed_date': record.completed_date,
+            'scheduled_date': record.scheduled_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'completed_date': record.completed_date.strftime('%Y-%m-%d %H:%M:%S') if record.completed_date else 'Не выполнено',
             'description': record.description
         }
         
         record.delete()
         
+        # Обновляем даты обслуживания
         last_completed = MaintenanceRecord.objects.filter(
             substation=substation,
             completed_date__isnull=False
@@ -513,22 +574,28 @@ def maintenance_record_delete(request, record_id):
         substation.next_maintenance = next_scheduled.scheduled_date if next_scheduled else None
         substation.save()
 
-        if hasattr(settings, 'EMAIL_BACKEND'):
+        try:
+            if not os.path.exists(settings.EMAIL_FILE_PATH):
+                os.makedirs(settings.EMAIL_FILE_PATH)
+                
             send_mail(
                 f"{settings.EMAIL_SUBJECT_PREFIX}Удалена запись об обслуживании подстанции: {record_info['substation_name']}",
                 f"""Была удалена запись об обслуживании:
                 Подстанция: {record_info['substation_name']}
                 Статус: {record_info['status']}
                 Запланированная дата: {record_info['scheduled_date']}
-                Дата выполнения: {record_info['completed_date'] or 'Не выполнено'}
+                Дата выполнения: {record_info['completed_date']}
                 Описание: {record_info['description']}
                 
                 Удалено пользователем: {request.user}
                 """,
                 settings.DEFAULT_FROM_EMAIL,
                 [substation.author.email],
-                fail_silently=True,
+                fail_silently=False
             )
+            logger.info(f"Email об удалении записи обслуживания для {record_info['substation_name']} успешно отправлен")
+        except Exception as e:
+            logger.error(f"Ошибка при отправке email об удалении записи обслуживания: {str(e)}")
         
         return redirect('substations:substation_detail', substation_id=substation.id)
     

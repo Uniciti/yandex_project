@@ -61,17 +61,10 @@ class MaintenanceRecordForm(forms.ModelForm):
             )
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        scheduled_date = cleaned_data.get('scheduled_date')
-        completed_date = cleaned_data.get('completed_date')
-
-        if completed_date and scheduled_date and completed_date < scheduled_date:
-            raise forms.ValidationError(
-                "Дата выполнения не может быть раньше запланированной даты"
-            )
-
-        return cleaned_data
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['scheduled_date'].required = True
+        self.fields['description'].required = True
 
 class SubstationGroupForm(forms.ModelForm):
     class Meta:
